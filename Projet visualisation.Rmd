@@ -75,7 +75,7 @@ pal <- colorFactor(c("#fad453","red","#5a213e","#e65000","yellow"), domain = c("
 map %>% addCircleMarkers(
   color = ~pal(dangerosite),
   stroke = FALSE, fillOpacity = 0.7,
-  radius = 3.5,
+  radius = ~(exp(Magnitude/4)),
   popup = ~as.character(Magnitude)
 )
 ```
