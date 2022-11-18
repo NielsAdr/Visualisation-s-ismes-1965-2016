@@ -44,7 +44,7 @@ dbTectonic$lat = as.numeric(dbTectonic$lat)
 dbTectonic$lon = as.numeric(dbTectonic$lon)
 dbTectonic$plate = str_to_upper(dbTectonic$plate)
 
-map = leaflet(data) %>% addTiles()
+map = leaflet(data_clean) %>% addProviderTiles("Esri.OceanBasemap")
 plates = dbTectonic$plate %>% unique() 
 
 for (plate1 in plates){ #For each plate
@@ -71,9 +71,11 @@ map
 ```{r}
 pal <- colorFactor(c("green", "yellow","orange","red","darkred"), domain = c("Grand séisme", "Très grand séisme","Séisme majeur","Séisme énorme","Séisme énorme et rare"))
 
-map %>% addCircles(~Longitude,~Latitude,popup = ~as.character(Magnitude)) %>% addCircleMarkers(
+map %>% addCircleMarkers(
   color = ~pal(dangerosite),
-  stroke = FALSE, fillOpacity = 0.5
+  stroke = FALSE, fillOpacity = 0.5,
+  radius = 1.5,
+  popup = ~as.character(Magnitude)
 )
 ```
 
