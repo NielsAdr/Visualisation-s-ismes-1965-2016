@@ -9,8 +9,6 @@ require(dplyr)
 require(stringr)
 require(leaflet)
 
-setwd("/Users/niels/Desktop/Cours/M2/Projet visu")
-
 data <- read.table('earthquake.csv', sep = ',', dec = '.', header = TRUE)
 data$Date <- substr(x= data$Date, start = 7, stop = 10)
 ```
