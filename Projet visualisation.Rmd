@@ -59,7 +59,11 @@ for (plate1 in plates){ #For each plate
     }
   }
   table1 = data %>%  slice((BorneInf + 1):nrow(data))
-  map = map %>% addPolylines(data = table1, lat = ~lat,lng =~lon,weight = 2,color = "black")
+  map = map %>% addPolylines(data = table1, lat = ~lat,lng =~lon,weight = 2,color = "black") %>%
+  setMaxBounds( lng1 = -87.94011
+                , lat1 = 41.64454
+                , lng2 = -87.52414
+                , lat2 = 42.02304 )
 }
 
 map
