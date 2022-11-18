@@ -1,0 +1,80 @@
+---
+title: "leaflet"
+author: "Niels"
+date: "2022-11-18"
+output: html_document
+---
+```{r}
+setwd("/Users/niels/Desktop/Cours/M2/Projet visu")
+
+data <- read.table('earthquake.csv', sep = ',', dec = '.', header = TRUE)
+data$Date <- substr(x= data$Date, start = 7, stop = 10)
+```
+
+```{r}
+data$Date <- as.factor(data$Date)
+data$Type <- as.factor(data$Type)
+data$Magnitude.Type <- as.factor(data$Magnitude.Type)
+data <- data %>% filter(Magnitude.Type != '')
+data <- data %>% filter(Type == 'Earthquake') # Nous ne voulons visualiser que les tremblements de terre
+summary(data)
+```
+```{r}
+data <- data %>%
+  mutate(dangerosite= case_when(Magnitude <= 6 ~ 'Grand séisme',
+                           Magnitude <= 6.9 ~ 'Très grand séisme',
+                           Magnitude <= 7.9 ~ 'Séisme majeur',
+                           Magnitude <= 8.9 ~ 'Séisme énorme',
+                           Magnitude > 9 ~ 'Séisme énorme et rare')) %>%
+  mutate(dangerosite = factor(dangerosite,
+                        levels = c('Grand séisme', 'Très grand séisme',
+                                   'Séisme majeur', 'Séisme énorme', 'Séisme énorme et rare'))) 
+```
+
+```{r}
+require(dplyr)
+require(stringr)
+require(leaflet)
+
+dbTectonic <- read.csv("tectonic.csv", sep=";")
+dbTectonic$lat = as.numeric(dbTectonic$lat)
+dbTectonic$lon = as.numeric(dbTectonic$lon)
+dbTectonic$plate = str_to_upper(dbTectonic$plate)
+
+map = leaflet(data) %>% addTiles()
+plates = dbTectonic$plate %>% unique() 
+
+for (plate1 in plates){ #For each plate
+  data = dbTectonic[(dbTectonic$plate == plate1),] %>% unique() 
+  BorneInf = 0
+  for (i in 1:nrow(data)){
+    if(i + 1 <= nrow(data)){
+      if(abs(data$lon[i]-data$lon[i + 1])>300){
+        table1 = data %>% slice((BorneInf + 1):i)
+        BorneInf = i
+        map = map %>% 
+          addPolylines(data = table1, lat = ~lat,lng =~lon,weight = 2,color = "black")
+        
+      }
+    }
+  }
+  table1 = data %>%  slice((BorneInf + 1):nrow(data))
+  map = map %>% addPolylines(data = table1, lat = ~lat,lng =~lon,weight = 2,color = "black")
+}
+
+map
+```
+
+```{r}
+pal <- colorFactor(c("green", "yellow","orange","red","darkred"), domain = c("Grand séisme", "Très grand séisme","Séisme majeur","Séisme énorme","Séisme énorme et rare"))
+
+map %>% addCircles(~Longitude,~Latitude,popup = ~as.character(Magnitude)) %>% addCircleMarkers(
+  color = ~pal(dangerosite),
+  stroke = FALSE, fillOpacity = 0.5
+)
+```
+
+```{r}
+
+```
+
