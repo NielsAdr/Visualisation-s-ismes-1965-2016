@@ -5,20 +5,16 @@ date: "2022-11-18"
 output: html_document
 ---
 ```{r}
+require(dplyr)
+require(stringr)
+require(leaflet)
+
 setwd("/Users/niels/Desktop/Cours/M2/Projet visu")
 
 data <- read.table('earthquake.csv', sep = ',', dec = '.', header = TRUE)
 data$Date <- substr(x= data$Date, start = 7, stop = 10)
 ```
 
-```{r}
-data$Date <- as.factor(data$Date)
-data$Type <- as.factor(data$Type)
-data$Magnitude.Type <- as.factor(data$Magnitude.Type)
-data <- data %>% filter(Magnitude.Type != '')
-data <- data %>% filter(Type == 'Earthquake') # Nous ne voulons visualiser que les tremblements de terre
-summary(data)
-```
 ```{r}
 data <- data %>%
   mutate(dangerosite= case_when(Magnitude <= 6 ~ 'Grand séisme',
@@ -32,10 +28,16 @@ data <- data %>%
 ```
 
 ```{r}
-require(dplyr)
-require(stringr)
-require(leaflet)
+data$Date <- as.factor(data$Date)
+data$Type <- as.factor(data$Type)
+data$Magnitude.Type <- as.factor(data$Magnitude.Type)
+data <- data %>% filter(Magnitude.Type != '')
+data <- data %>% filter(Type == 'Earthquake') # Nous ne voulons visualiser que les tremblements de terre
+data_clean <- data[,c(1,3,4,5,6,9,22)]
+summary(data_clean)
+```
 
+```{r}
 dbTectonic <- read.csv("tectonic.csv", sep=";")
 dbTectonic$lat = as.numeric(dbTectonic$lat)
 dbTectonic$lon = as.numeric(dbTectonic$lon)
