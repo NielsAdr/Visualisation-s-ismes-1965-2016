@@ -15,14 +15,14 @@ data$Date <- substr(x= data$Date, start = 7, stop = 10)
 
 ```{r}
 data <- data %>%
-  mutate(dangerosite= case_when(Magnitude <= 6 ~ 'Grand séisme',
-                           Magnitude <= 6.9 ~ 'Très grand séisme',
-                           Magnitude <= 7.9 ~ 'Séisme majeur',
-                           Magnitude <= 8.9 ~ 'Séisme énorme',
-                           Magnitude > 9 ~ 'Séisme énorme et rare')) %>%
+  mutate(dangerosite= case_when(Magnitude <= 6 ~ 'Grand séisme ≤ 6',
+                           Magnitude <= 6.9 ~ 'Très grand séisme ≤ 6,9',
+                           Magnitude <= 7.9 ~ 'Séisme majeur ≤ 7,9',
+                           Magnitude <= 8.9 ~ 'Séisme énorme ≤ 8,9',
+                           Magnitude > 8.9 ~ 'Séisme énorme et rare > 8.9')) %>%
   mutate(dangerosite = factor(dangerosite,
-                        levels = c('Grand séisme', 'Très grand séisme',
-                                   'Séisme majeur', 'Séisme énorme', 'Séisme énorme et rare'))) 
+                        levels = c('Grand séisme ≤ 6', 'Très grand séisme ≤ 6,9',
+                                   'Séisme majeur ≤ 7,9', 'Séisme énorme ≤ 8,9', 'Séisme énorme et rare > 8.9'))) 
 ```
 
 ```{r}
@@ -41,7 +41,7 @@ dbTectonic$lat = as.numeric(dbTectonic$lat)
 dbTectonic$lon = as.numeric(dbTectonic$lon)
 dbTectonic$plate = str_to_upper(dbTectonic$plate)
 
-map = leaflet(data_clean) %>% addProviderTiles("Esri.OceanBasemap")
+map = leaflet(data_clean) %>% addProviderTiles("Esri.WorldImagery")
 plates = dbTectonic$plate %>% unique() 
 
 for (plate1 in plates){ #For each plate
@@ -66,17 +66,20 @@ map
 ```
 
 ```{r}
-pal <- colorFactor(c("#fad453","red","#5a213e","#e65000","yellow"), domain = c("Grand séisme","Séisme énorme","Séisme énorme et rare","Séisme majeur", "Très grand séisme"))
+pal <- colorFactor(c("#fad453","yellow","#e65000","red","#5a213e"), domain = NULL)
 
-map %>% addCircleMarkers(
-  color = ~pal(dangerosite),
-  stroke = FALSE, fillOpacity = 0.7,
+label <- paste(
+  "Depth: ", data_clean$Depth, "<br/>",
+  "Magnitude: ", data_clean$Magnitude, "<br/>",
+  "Année: ", data_clean$Date, "<br/>") %>%
+  lapply(htmltools::HTML)
+
+map %>% addCircleMarkers(~Longitude,~Latitude,
+  fillColor = ~pal(dangerosite),
+  stroke = FALSE, fillOpacity = ~Magnitude/10,
   radius = ~(exp(Magnitude/4)),
-  popup = ~as.character(Magnitude)
-)
-```
-
-```{r}
-
+  label = label
+) %>%
+  addLegend (pal = pal, values = ~dangerosite, title = "Dangerosité", position = "bottomright")
 ```
 
