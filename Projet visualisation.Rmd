@@ -66,12 +66,12 @@ map
 ```
 
 ```{r}
-pal <- colorFactor(c("green", "yellow","orange","red","darkred"), domain = c("Grand séisme", "Très grand séisme","Séisme majeur","Séisme énorme","Séisme énorme et rare"))
+pal <- colorFactor(c("#fad453","red","#5a213e","#e65000","yellow"), domain = c("Grand séisme","Séisme énorme","Séisme énorme et rare","Séisme majeur", "Très grand séisme"))
 
 map %>% addCircleMarkers(
   color = ~pal(dangerosite),
-  stroke = FALSE, fillOpacity = 0.5,
-  radius = 1.5,
+  stroke = FALSE, fillOpacity = 0.7,
+  radius = 3.5,
   popup = ~as.character(Magnitude)
 )
 ```
