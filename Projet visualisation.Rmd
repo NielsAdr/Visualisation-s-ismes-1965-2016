@@ -76,10 +76,16 @@ label <- paste(
 
 map %>% addCircleMarkers(~Longitude,~Latitude,
   fillColor = ~pal(dangerosite),
+  group = ~dangerosite,
   stroke = FALSE, fillOpacity = ~Magnitude/10,
   radius = ~(exp(Magnitude/4)),
   label = label
 ) %>%
-  addLegend (pal = pal, values = ~dangerosite, title = "Dangerosité", position = "bottomright")
+  addLegend (pal = pal, values = ~dangerosite, title = "Dangerosité", position = "bottomright") %>%
+  addLayersControl(
+    overlayGroups = c('Grand séisme ≤ 6', 'Très grand séisme ≤ 6,9',
+                                   'Séisme majeur ≤ 7,9', 'Séisme énorme ≤ 8,9', 'Séisme énorme et rare > 8.9'),
+    options = layersControlOptions(collapsed = FALSE)
+    )
 ```
 
