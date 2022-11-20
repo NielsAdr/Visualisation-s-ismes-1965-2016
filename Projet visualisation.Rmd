@@ -16,13 +16,13 @@ data$Date <- substr(x= data$Date, start = 7, stop = 10)
 ```{r}
 data <- data %>%
   mutate(dangerosite= case_when(Magnitude <= 6 ~ 'Grand séisme ≤ 6',
-                           Magnitude <= 6.9 ~ 'Très grand séisme ≤ 6,9',
-                           Magnitude <= 7.9 ~ 'Séisme majeur ≤ 7,9',
-                           Magnitude <= 8.9 ~ 'Séisme énorme ≤ 8,9',
-                           Magnitude > 8.9 ~ 'Séisme énorme et rare > 8.9')) %>%
+                                Magnitude <= 6.9 ~ 'Très grand séisme ≤ 6,9',
+                                Magnitude <= 7.9 ~ 'Séisme majeur ≤ 7,9',
+                                Magnitude <= 8.9 ~ 'Séisme énorme ≤ 8,9',
+                                Magnitude > 8.9 ~ 'Séisme énorme et rare > 8.9')) %>%
   mutate(dangerosite = factor(dangerosite,
-                        levels = c('Grand séisme ≤ 6', 'Très grand séisme ≤ 6,9',
-                                   'Séisme majeur ≤ 7,9', 'Séisme énorme ≤ 8,9', 'Séisme énorme et rare > 8.9'))) 
+                              levels = c('Grand séisme ≤ 6', 'Très grand séisme ≤ 6,9',
+                                         'Séisme majeur ≤ 7,9', 'Séisme énorme ≤ 8,9', 'Séisme énorme et rare > 8.9'))) 
 ```
 
 ```{r}
@@ -63,10 +63,11 @@ for (plate1 in plates){ #For each plate
   map = map %>% addPolylines(data = table1, lat = ~lat,lng =~lon,weight = 2,color = "black")
 }
 
-map
+
 ```
 
 ```{r}
+#palette de couleur
 pal <- colorFactor(c("#fad453","yellow","#e65000","red","#5a213e"), domain = NULL)
 
 label <- paste(
@@ -76,18 +77,18 @@ label <- paste(
   lapply(htmltools::HTML)
 
 map %>% addCircleMarkers(~Longitude,~Latitude,
-  fillColor = ~pal(dangerosite),
-  group = ~dangerosite,
-  stroke = FALSE, fillOpacity = ~Magnitude/10,
-  radius = ~(exp(Magnitude/4)),
-  label = label
+                         fillColor = ~pal(dangerosite),
+                         group = ~dangerosite,
+                         stroke = FALSE, fillOpacity = ~Magnitude/10,
+                         radius = ~(exp(Magnitude/4)),
+                         label = label
 ) %>%
   addLegend (pal = pal, values = ~dangerosite, title = "Dangerosité", position = "bottomright") %>%
   addLayersControl(
     overlayGroups = c('Grand séisme ≤ 6', 'Très grand séisme ≤ 6,9',
-                                   'Séisme majeur ≤ 7,9', 'Séisme énorme ≤ 8,9', 'Séisme énorme et rare > 8.9'),
+                      'Séisme majeur ≤ 7,9', 'Séisme énorme ≤ 8,9', 'Séisme énorme et rare > 8.9'),
     options = layersControlOptions(collapsed = FALSE)
-    )
+  )
 ```
 
 ```{r}
@@ -99,6 +100,9 @@ tsunami <- read.csv ("tsunami.csv", header = TRUE, sep = ",", dec = ".")
 ```{r}
 tsunami <- tsunami %>% filter(Year >= 1965)%>% filter(is.na(Longitude) == FALSE)%>% filter(is.na(Latitude) == FALSE)
 ```
+
+
+
 
 ```{r}
 #pour afficher des données de plusieurs data_sets, il ne faut pas déclarer de data frame dans leaflet(), mais les mettre dans data de chaque objet
@@ -127,30 +131,113 @@ for (plate1 in plates){ #For each plate
 }
 
 map_tsunami %>% 
-    addCircleMarkers(data = tsunami,
-                     ~Longitude,
-                     ~Latitude,
-                     fillColor = "blue",
-                     radius = 1,
-                     opacity = 1)%>%
+  addCircleMarkers(data = tsunami,
+                   ~Longitude,
+                   ~Latitude,
+                   fillColor = "blue",
+                   radius = 1,
+                   opacity = 1)%>%
   addCircleMarkers(data = data_clean, ~Longitude,
-                                 ~Latitude,
-                                 fillColor = ~pal(dangerosite),
-                                 group = ~dangerosite,
-                                 stroke = FALSE, 
-                                 fillOpacity =~Magnitude/10,
-                                 radius= ~(exp(Magnitude/4)),
-                                 label = label) %>%
+                   ~Latitude,
+                   fillColor = ~pal(dangerosite),
+                   group = ~dangerosite,
+                   stroke = FALSE, 
+                   fillOpacity =~Magnitude/10,
+                   radius= ~(exp(Magnitude/4)/2),
+                   label = label) %>%
   addLegend (data = data_clean, pal = pal, values = ~dangerosite, 
              title = "Dangerosité", 
              position= "bottomright") %>%
   addLayersControl(overlayGroups = c('Grand séisme ≤ 6',
                                      'Très grand séisme ≤ 6,9',
-                                   'Séisme majeur ≤ 7,9',
-                                   'Séisme énorme ≤ 8,9', 
-                                   'Séisme énorme et rare > 8.9'),
-    options = layersControlOptions(collapsed = FALSE)
-    )
+                                     'Séisme majeur ≤ 7,9',
+                                     'Séisme énorme ≤ 8,9', 
+                                     'Séisme énorme et rare > 8.9'),
+                   options = layersControlOptions(collapsed = FALSE)
+  )
 ```
+
+### En fonction du temps
+
+```{r}
+year = 2000 #to 2016
+```
+
+
+```{r}
+
+
+map_year = leaflet()%>% addProviderTiles("Esri.WorldImagery")
+plates = dbTectonic$plate %>% unique() 
+
+for (plate1 in plates){ #For each plate
+  data = dbTectonic[(dbTectonic$plate == plate1),] %>% unique() 
+  BorneInf = 0
+  for (i in 1:nrow(data)){
+    if(i + 1 <= nrow(data)){
+      if(abs(data$lon[i]-data$lon[i + 1])>300){
+        table1 = data %>% slice((BorneInf + 1):i)
+        BorneInf = i
+        map_year = map_year %>% 
+          addPolylines(data = table1, lat = ~lat,lng =~lon,weight = 2,color = "black")
+        
+      }
+    }
+  }
+  table1 = data %>%  slice((BorneInf + 1):nrow(data))
+  map_year = map_year %>% addPolylines(data = table1, 
+                                       lat = ~lat,
+                                       lng =~lon,weight = 2,
+                                       color = "black")
+}
+
+
+#filter 
+tsunami_year <- tsunami %>% filter(Year == year)%>% filter(is.na(Longitude) == FALSE)%>% filter(is.na(Latitude) == FALSE)
+
+earthquake_year <- data_clean %>% filter(Date == year)
+#map creation
+map_year %>% 
+  addCircleMarkers(data = tsunami_year,
+                   ~Longitude,
+                   ~Latitude,
+                   fillColor = "blue",
+                   radius = 1,
+                   opacity = 1)%>%
+  addCircleMarkers(data = earthquake_year, ~Longitude,
+                   ~Latitude,
+                   fillColor = ~pal(dangerosite),
+                   group = ~dangerosite,
+                   stroke = FALSE, 
+                   fillOpacity =~Magnitude/10,
+                   radius= ~(exp(Magnitude/4)),
+                   label = label) %>%
+  addLegend (data = earthquake_year, pal = pal, values = ~dangerosite, 
+             title = "Dangerosité", 
+             position= "bottomright") %>%
+  addLayersControl(overlayGroups = c('Grand séisme ≤ 6',
+                                     'Très grand séisme ≤ 6,9',
+                                     'Séisme majeur ≤ 7,9',
+                                     'Séisme énorme ≤ 8,9', 
+                                     'Séisme énorme et rare > 8.9'),
+                   options = layersControlOptions(collapsed = FALSE)
+  )
+
+```
+
+```{r}
+mapCreationYear(1965)
+```
+
+```{r}
+#Plot a 3d cube according to the coordinates
+require(rgl)
+plot3d(
+  x=data_clean$Longitude,
+  y=data_clean$Latitude,
+  #Depth coordinates should be negative
+  z=data_clean$Depth*-1,
+  size = 2,
+  col = c("blue"))
 ```
 
