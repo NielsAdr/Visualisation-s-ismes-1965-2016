@@ -196,6 +196,14 @@ for (plate1 in plates){ #For each plate
 tsunami_year <- tsunami %>% filter(Year == year)%>% filter(is.na(Longitude) == FALSE)%>% filter(is.na(Latitude) == FALSE)
 
 earthquake_year <- data_clean %>% filter(Date == year)
+
+pal <- colorFactor(c("#fad453","yellow","#e65000","red","#5a213e"), domain = NULL)
+
+label <- paste(
+  "Depth: ", earthquake_year$Depth, "<br/>",
+  "Magnitude: ", earthquake_year$Magnitude, "<br/>",
+  "Année: ", earthquake_year$Date, "<br/>") %>%
+  lapply(htmltools::HTML)
 #map creation
 map_year %>% 
   addCircleMarkers(data = tsunami_year,
