@@ -218,7 +218,7 @@ map_year %>%
                    group = ~dangerosite,
                    stroke = FALSE, 
                    fillOpacity =~Magnitude/10,
-                   radius= ~(exp(Magnitude/4)),
+                   radius= ~(exp(Magnitude/4)/2),
                    label = label) %>%
   addLegend (data = earthquake_year, pal = pal, values = ~dangerosite, 
              title = "Dangerosité", 
