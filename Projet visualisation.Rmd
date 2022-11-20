@@ -90,3 +90,67 @@ map %>% addCircleMarkers(~Longitude,~Latitude,
     )
 ```
 
+```{r}
+#tsunamis
+
+tsunami <- read.csv ("tsunami.csv", header = TRUE, sep = ",", dec = ".")
+```
+
+```{r}
+tsunami <- tsunami %>% filter(Year >= 1965)%>% filter(is.na(Longitude) == FALSE)%>% filter(is.na(Latitude) == FALSE)
+```
+
+```{r}
+#pour afficher des données de plusieurs data_sets, il ne faut pas déclarer de data frame dans leaflet(), mais les mettre dans data de chaque objet
+map_tsunami = leaflet()%>% addProviderTiles("Esri.WorldImagery")
+plates = dbTectonic$plate %>% unique() 
+
+for (plate1 in plates){ #For each plate
+  data = dbTectonic[(dbTectonic$plate == plate1),] %>% unique() 
+  BorneInf = 0
+  for (i in 1:nrow(data)){
+    if(i + 1 <= nrow(data)){
+      if(abs(data$lon[i]-data$lon[i + 1])>300){
+        table1 = data %>% slice((BorneInf + 1):i)
+        BorneInf = i
+        map_tsunami = map_tsunami %>% 
+          addPolylines(data = table1, lat = ~lat,lng =~lon,weight = 2,color = "black")
+        
+      }
+    }
+  }
+  table1 = data %>%  slice((BorneInf + 1):nrow(data))
+  map_tsunami = map_tsunami %>% addPolylines(data = table1, 
+                                             lat = ~lat,
+                                             lng =~lon,weight = 2,
+                                             color = "black")
+}
+
+map_tsunami %>% 
+    addCircleMarkers(data = tsunami,
+                     ~Longitude,
+                     ~Latitude,
+                     fillColor = "blue",
+                     radius = 1,
+                     opacity = 1)%>%
+  addCircleMarkers(data = data_clean, ~Longitude,
+                                 ~Latitude,
+                                 fillColor = ~pal(dangerosite),
+                                 group = ~dangerosite,
+                                 stroke = FALSE, 
+                                 fillOpacity =~Magnitude/10,
+                                 radius= ~(exp(Magnitude/4)),
+                                 label = label) %>%
+  addLegend (data = data_clean, pal = pal, values = ~dangerosite, 
+             title = "Dangerosité", 
+             position= "bottomright") %>%
+  addLayersControl(overlayGroups = c('Grand séisme ≤ 6',
+                                     'Très grand séisme ≤ 6,9',
+                                   'Séisme majeur ≤ 7,9',
+                                   'Séisme énorme ≤ 8,9', 
+                                   'Séisme énorme et rare > 8.9'),
+    options = layersControlOptions(collapsed = FALSE)
+    )
+```
+```
+
