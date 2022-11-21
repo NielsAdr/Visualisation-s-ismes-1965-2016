@@ -233,9 +233,7 @@ map_year %>%
 
 ```
 
-```{r}
-mapCreationYear(1965)
-```
+
 
 ```{r}
 #Plot a 3d cube according to the coordinates
