@@ -9,12 +9,12 @@ require(dplyr)
 require(stringr)
 require(leaflet)
 require(ggplot2)
-
-data <- read.table('earthquake.csv', sep = ',', dec = '.', header = TRUE)
-data$Date <- substr(x= data$Date, start = 7, stop = 10)
 ```
 
 ```{r}
+data <- read.table('earthquake.csv', sep = ',', dec = '.', header = TRUE)
+data$Date <- substr(x= data$Date, start = 7, stop = 10)
+
 data <- data %>%
   mutate(dangerosite= case_when(Magnitude <= 6 ~ 'Grand séisme ≤ 6',
                                 Magnitude <= 6.9 ~ 'Très grand séisme ≤ 6,9',
@@ -24,9 +24,7 @@ data <- data %>%
   mutate(dangerosite = factor(dangerosite,
                               levels = c('Grand séisme ≤ 6', 'Très grand séisme ≤ 6,9',
                                          'Séisme majeur ≤ 7,9', 'Séisme énorme ≤ 8,9', 'Séisme énorme et rare > 8.9'))) 
-```
 
-```{r}
 data$Date <- as.factor(data$Date)
 data$Type <- as.factor(data$Type)
 data$Magnitude.Type <- as.factor(data$Magnitude.Type)
@@ -39,9 +37,7 @@ summary(data_clean)
 # graphe statique : nombre de séismes par an dans le monde
 ```{r}
 group_year <- data_clean %>% group_by(Date)%>% summarise (n = n(), mean_mag = mean(Magnitude))
-```
 
-```{r}
 p <-ggplot(data = group_year) +
   geom_bar(aes(x = Date, y=n, fill = mean_mag), stat="identity")+
   ggtitle("Nombre de tremblements de terre par année", subtitle = "entre 1965 et 2016")+
