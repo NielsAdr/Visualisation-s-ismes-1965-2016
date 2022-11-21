@@ -256,12 +256,15 @@ map_year %>%
 require(rgl)
 plot3d(
   x=data_clean$Longitude,
+  xlab = "Longitude",
   y=data_clean$Latitude,
+  ylab = "Latitude",
   #Depth coordinates should be negative
   z=data_clean$Depth*-1,
+  zlab = "Profondeur",
   size = 2,
   col = c("blue"))
 
-play3d(spin3d(axis = c(1, 0, 0), rpm = 5), duration = 20 )
+play3d(spin3d(axis = c(0, 0, 1), rpm = 5), duration = 10 )
 ```
 
