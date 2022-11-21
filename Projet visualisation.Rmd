@@ -12,6 +12,7 @@ require(ggplot2)
 library(webshot)
 library(htmlwidgets)
 require(oceanis)
+require(mapview)
 require(magick)
 require(magrittr)
 
@@ -47,10 +48,7 @@ summary(data_clean)
 ```{r}
 #tsunamis
 tsunami <- read.csv ("tsunami.csv", header = TRUE, sep = ",", dec = ".")
-```
 
-
-```{r}
 tsunami <- tsunami %>% filter(Year >= 1965)%>% filter (Year<= 2016) %>% filter(is.na(Longitude) == FALSE)%>% filter(is.na(Latitude) == FALSE)
 ```
 
@@ -295,7 +293,8 @@ map_year %>%
                                      'Séisme majeur ≤ 7,9',
                                      'Séisme énorme ≤ 8,9', 
                                      'Séisme énorme et rare > 8.9'),
-                   options = layersControlOptions(collapsed = FALSE)
+                   options = layersControlOptions(collapsed = FALSE)%>%
+                     addScaleBar(position = "bottomleft")
   )
 
 
@@ -379,12 +378,12 @@ mapPerYear <- function(year){
 
 # running the code for all years
 ```{r}
-# for (k in (1965:2016)){
-#   mapPerYear(k)
-# }
+for (k in (1965:2016)){
+mapPerYear(k)
+}
 ```
 
-#gri creation
+#gif creation
 
 ```{r}
 
