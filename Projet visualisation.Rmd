@@ -86,8 +86,8 @@ for (plate1 in plates){ #For each plate
 #palette de couleur
 pal <- colorFactor(c("#fad453","yellow","#e65000","red","#5a213e"), domain = NULL)
 
-label <- paste(
-  "Depth: ", data_clean$Depth, "<br/>",
+labelSeismes <- paste(
+  "Profondeur: ", data_clean$Depth, "<br/>",
   "Magnitude: ", data_clean$Magnitude, "<br/>",
   "Année: ", data_clean$Date, "<br/>") %>%
   lapply(htmltools::HTML)
@@ -97,7 +97,7 @@ map %>% addCircleMarkers(~Longitude,~Latitude,
                          group = ~dangerosite,
                          stroke = FALSE, fillOpacity = ~Magnitude/10,
                          radius = ~(exp(Magnitude/4)/2),
-                         label = label
+                         label = labelSeismes
 ) %>%
   addLegend (pal = pal, values = ~dangerosite, title = "Dangerosité", position = "bottomright") %>%
   addLayersControl(
@@ -124,6 +124,13 @@ tsunami <- tsunami %>% filter(Year >= 1965)%>% filter(is.na(Longitude) == FALSE)
 #pour afficher des données de plusieurs data_sets, il ne faut pas déclarer de data frame dans leaflet(), mais les mettre dans data de chaque objet
 map_tsunami = leaflet()%>% addProviderTiles("Esri.WorldImagery")
 plates = dbTectonic$plate %>% unique() 
+
+labelTsunamis <- paste(
+  "Localisation: ",tsunami$Location.Name, "<br/>",
+  "Pays: ", tsunami$Country, "<br/>",
+  "Magnitude du séisme: ",tsunami$Earthquake.Magnitude, "<br/>",
+  "Année: ",tsunami$Year, "<br/>") %>%
+  lapply(htmltools::HTML)
 
 for (plate1 in plates){ #For each plate
   data = dbTectonic[(dbTectonic$plate == plate1),] %>% unique() 
@@ -152,7 +159,8 @@ map_tsunami %>%
                    ~Latitude,
                    fillColor = "blue",
                    radius = 1,
-                   opacity = 1)%>%
+                   opacity = 1,
+                   label = labelTsunamis)%>%
   addCircleMarkers(data = data_clean, ~Longitude,
                    ~Latitude,
                    fillColor = ~pal(dangerosite),
@@ -160,7 +168,7 @@ map_tsunami %>%
                    stroke = FALSE, 
                    fillOpacity =~Magnitude/10,
                    radius= ~(exp(Magnitude/4)/2),
-                   label = label) %>%
+                   label = labelSeismes) %>%
   addLegend (data = data_clean, pal = pal, values = ~dangerosite, 
              title = "Dangerosité", 
              position= "bottomright") %>%
@@ -215,11 +223,17 @@ earthquake_year <- data_clean %>% filter(Date == year)
 
 pal <- colorFactor(c("#fad453","yellow","#e65000","red","#5a213e"), domain = NULL)
 
-label <- paste(
-  "Depth: ", earthquake_year$Depth, "<br/>",
-  "Magnitude: ", earthquake_year$Magnitude, "<br/>",
-  "Année: ", earthquake_year$Date, "<br/>") %>%
+labelSeismesAnnee <- paste(
+  "Profondeur: ", earthquake_year$Depth, "<br/>",
+  "Magnitude: ", earthquake_year$Magnitude, "<br/>") %>%
   lapply(htmltools::HTML)
+
+labelTsunamisAnnee <- paste(
+  "Localisation: ",tsunami_year$Location.Name, "<br/>",
+  "Pays: ", tsunami_year$Country, "<br/>",
+  "Magnitude du séisme: ",tsunami_year$Earthquake.Magnitude, "<br/>") %>%
+  lapply(htmltools::HTML)
+
 #map creation
 map_year %>% 
   addCircleMarkers(data = tsunami_year,
@@ -227,7 +241,8 @@ map_year %>%
                    ~Latitude,
                    fillColor = "blue",
                    radius = 1,
-                   opacity = 1)%>%
+                   opacity = 1,
+                   label = labelTsunamisAnnee)%>%
   addCircleMarkers(data = earthquake_year, ~Longitude,
                    ~Latitude,
                    fillColor = ~pal(dangerosite),
@@ -235,7 +250,7 @@ map_year %>%
                    stroke = FALSE, 
                    fillOpacity =~Magnitude/10,
                    radius= ~(exp(Magnitude/4)/2),
-                   label = label) %>%
+                   label = labelSeismesAnnee) %>%
   addLegend (data = earthquake_year, pal = pal, values = ~dangerosite, 
              title = "Dangerosité", 
              position= "bottomright") %>%
