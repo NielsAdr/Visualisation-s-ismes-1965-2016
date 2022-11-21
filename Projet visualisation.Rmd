@@ -31,10 +31,25 @@ data$Type <- as.factor(data$Type)
 data$Magnitude.Type <- as.factor(data$Magnitude.Type)
 data <- data %>% filter(Magnitude.Type != '')
 data <- data %>% filter(Type == 'Earthquake') # Nous ne voulons visualiser que les tremblements de terre
-data_clean <- data[-c(7383,20468),c(1,3,4,5,6,9,22)]
+data_clean <- data[-c(7383,20468, 3360),c(1,3,4,5,6,9,22)]
 data_clean <- data_clean[order(data_clean$Magnitude),]
 summary(data_clean)
 ```
+# graphe statique : nombre de séismes par an dans le monde
+```{r}
+group_year <- data_clean %>% group_by(Date)%>% summarise (n = n(), mean_mag = mean(Magnitude))
+```
+
+```{r}
+p <-ggplot(data = group_year) +
+  geom_bar(aes(x = Date, y=n, fill = mean_mag), stat="identity")+
+  ggtitle("Nombre de tremblements de terre par année", subtitle = "entre 1965 et 2016")+
+  theme(axis.text.x = element_text(size=7, angle=80))+
+  scale_fill_gradient(low = "yellow", high = "#e65000" )+
+  labs(fill = "Magnitude Moyenne", x = "Année")
+p
+```
+
 
 ```{r}
 dbTectonic <- read.csv("tectonic.csv", sep=";")
@@ -247,5 +262,7 @@ plot3d(
   z=data_clean$Depth*-1,
   size = 2,
   col = c("blue"))
+
+play3d(spin3d(axis = c(1, 0, 0), rpm = 5), duration = 20 )
 ```
 
