@@ -75,10 +75,6 @@ for (plate1 in plates){ #For each plate
   map = map %>% addPolylines(data = table1, lat = ~lat,lng =~lon,weight = 2,color = "black")
 }
 
-
-```
-
-```{r}
 #palette de couleur
 pal <- colorFactor(c("#fad453","yellow","#e65000","red","#5a213e"), domain = NULL)
 
@@ -107,16 +103,9 @@ map %>% addCircleMarkers(~Longitude,~Latitude,
 #tsunamis
 
 tsunami <- read.csv ("tsunami.csv", header = TRUE, sep = ",", dec = ".")
-```
 
-```{r}
 tsunami <- tsunami %>% filter(Year >= 1965)%>% filter(is.na(Longitude) == FALSE)%>% filter(is.na(Latitude) == FALSE)
-```
 
-
-
-
-```{r}
 #pour afficher des données de plusieurs data_sets, il ne faut pas déclarer de data frame dans leaflet(), mais les mettre dans data de chaque objet
 map_tsunami = leaflet()%>% addProviderTiles("Esri.WorldImagery")
 plates = dbTectonic$plate %>% unique() 
@@ -181,11 +170,6 @@ map_tsunami %>%
 
 ```{r}
 year = 2000 #to 2016
-```
-
-
-```{r}
-
 
 map_year = leaflet()%>% addProviderTiles("Esri.WorldImagery")
 plates = dbTectonic$plate %>% unique() 
