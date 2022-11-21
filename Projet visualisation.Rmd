@@ -11,6 +11,9 @@ require(leaflet)
 require(ggplot2)
 library(webshot)
 library(htmlwidgets)
+require(oceanis)
+require(magick)
+require(magrittr)
 
 data <- read.table('earthquake.csv', sep = ',', dec = '.', header = TRUE)
 data$Date <- substr(x= data$Date, start = 7, stop = 10)
@@ -296,7 +299,6 @@ map_year %>%
   )
 
 
-
 ```
 
 #function
@@ -365,7 +367,8 @@ mapPerYear <- function(year){
                                        'Séisme énorme et rare > 8.9'),
                      options = layersControlOptions(collapsed = FALSE)
     )%>%
-    addScaleBar(position = "bottomleft")
+    addScaleBar(position = "bottomleft")%>%
+  add_titre( as.character(year))
   
   mapshot(map_year, file = paste("C:/Users/Floriane/Documents/GitHub/Visualisation-seismes-1965-2016/png/Rplot", year,".png", sep = ""),cliprect = "viewport")
 }
@@ -374,15 +377,24 @@ mapPerYear <- function(year){
 ```
 
 
-
+# running the code for all years
 ```{r}
-# for (k in (1966:2016)){
+# for (k in (1965:2016)){
 #   mapPerYear(k)
 # }
-
-
 ```
 
+#gri creation
+
+```{r}
+
+
+list.files(path='C:/Users/Floriane/Documents/GitHub/Visualisation-seismes-1965-2016/png/', pattern = '*.png', full.names = TRUE) %>% 
+        image_read() %>% # reads each path file
+        image_join() %>% # joins image
+        image_animate(fps = 2) %>% # animates, can opt for number of loops
+        image_write("YearsAnimation.gif") # write to current dir
+```
 
 
 ```{r}
