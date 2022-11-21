@@ -130,7 +130,14 @@ map %>% addCircleMarkers(~Longitude,~Latitude,
                                      'Séisme énorme ≤ 8,9',
                                      'Séisme énorme et rare > 8.9'),
                    options = layersControlOptions(collapsed = FALSE))%>%
-  addScaleBar(position = "bottomleft")
+  addScaleBar(position = "bottomleft")%>%
+  addLegend (pal = pal, values = ~dangerosite, title = "Dangerosité", position = "bottomright") %>%
+  addLayersControl(
+    overlayGroups = c('Grand séisme ≤ 6', 'Très grand séisme ≤ 6,9',
+                      'Séisme majeur ≤ 7,9', 'Séisme énorme ≤ 8,9', 'Séisme énorme et rare > 8.9'),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+
 ```
 
 
@@ -214,6 +221,34 @@ year = 2001 #to 2016
 ```
 
 ```{r}
+
+year = 2000 #to 2016
+
+map_year = leaflet()%>% addProviderTiles("Esri.WorldImagery")
+plates = dbTectonic$plate %>% unique() 
+
+for (plate1 in plates){ #For each plate
+  data = dbTectonic[(dbTectonic$plate == plate1),] %>% unique() 
+  BorneInf = 0
+  for (i in 1:nrow(data)){
+    if(i + 1 <= nrow(data)){
+      if(abs(data$lon[i]-data$lon[i + 1])>300){
+        table1 = data %>% slice((BorneInf + 1):i)
+        BorneInf = i
+        map_year = map_year %>% 
+          addPolylines(data = table1, lat = ~lat,lng =~lon,weight = 2,color = "black")
+        
+      }
+    }
+  }
+  table1 = data %>%  slice((BorneInf + 1):nrow(data))
+  map_year = map_year %>% addPolylines(data = table1, 
+                                       lat = ~lat,
+                                       lng =~lon,weight = 2,
+                                       color = "black")
+}
+
+
 #filter 
 tsunami_year <- tsunami %>% filter(Year == year)%>% filter(is.na(Longitude) == FALSE)%>% filter(is.na(Latitude) == FALSE)
 
@@ -365,9 +400,8 @@ plot3d(
   col = c("blue"))
 
 play3d(spin3d(axis = c(0, 0, 1), rpm = 5), duration = 10 )
+
 ```
 
 
-```{r}
-```
 
