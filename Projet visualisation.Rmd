@@ -8,6 +8,7 @@ output: html_document
 require(dplyr)
 require(stringr)
 require(leaflet)
+require(ggplot2)
 
 data <- read.table('earthquake.csv', sep = ',', dec = '.', header = TRUE)
 data$Date <- substr(x= data$Date, start = 7, stop = 10)
@@ -95,7 +96,7 @@ map %>% addCircleMarkers(~Longitude,~Latitude,
                          fillColor = ~pal(dangerosite),
                          group = ~dangerosite,
                          stroke = FALSE, fillOpacity = ~Magnitude/10,
-                         radius = ~(exp(Magnitude/4)),
+                         radius = ~(exp(Magnitude/4)/2),
                          label = label
 ) %>%
   addLegend (pal = pal, values = ~dangerosite, title = "Dangerosité", position = "bottomright") %>%
